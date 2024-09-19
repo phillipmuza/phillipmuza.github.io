@@ -1,0 +1,56 @@
+# Site
+title: Phillip Munashe Muza, PhD | Neuroscientist
+email: p.muza@ucl.ac.uk | phillipmuza@gmail.com
+twitter_username: PhillipMuza
+github_username:  phillipmuza
+description: >- # this means to ignore newlines until "baseurl:"
+  This is a personal website, for me, Phillip/Phil.
+  Here you will find out a little bit about me.
+  The interesting, the mundane, and the weird. Really, a glimpse into my psyche.
+  But importantly, blog posts on science, philosophy, and whatever else I find interesting.
+  New blog posts will be published regularly, stay tuned!
+baseurl: "" 
+url: "https://phillipmuza.com" # Add your actual domain here
+
+include: ["_pages"]
+permalink: /:title/
+
+# Plugins
+plugins: 
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-paginate
+  - jekyll-seo-tag
+
+# Defaults
+defaults:
+
+# all posts
+- scope:
+    path: "_posts"
+    values:
+      layout: post
+      author: Phillip
+  avatar: /assets/images/avatar1.jpg
+      
+# all pages
+- scope:
+    path: "_pages"
+    values:
+      layout: page
+      
+# Syntax
+markdown: kramdown
+highlighter: rouge
+
+# Paginate
+paginate: 10
+
+# Exclude from processing.
+# The following items will not be processed, by default.
+# Any item listed under the `exclude:` key here will be automatically added to
+# the internal "default list".
+#
+# Excluded items can be processed by explicitly listing the directories o# their entries' file path in the `include:` list.
+#
+exclude: [.sass-cache, .jekyll-cache, gemfiles, Gemfile, Gemfile.lock, node_modules, vendor/bundle, vendor/cache,vendor/gems, vendor/ruby/]
