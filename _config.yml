@@ -10,7 +10,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   But importantly, blog posts on science, philosophy, and whatever else I find interesting.
   New blog posts will be published regularly, stay tuned!
 baseurl: "" 
-url: "https://phillipmuza.com" # Add your actual domain here
+url: "https://phillipmuza.github.io/" # Add your actual domain here
 
 include: ["_pages"]
 permalink: /:title/
