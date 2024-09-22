@@ -10,7 +10,8 @@ description: >- # this means to ignore newlines until "baseurl:"
   But importantly, blog posts on science, philosophy, and whatever else I find interesting.
   New blog posts will be published regularly, stay tuned!
 baseurl: "" 
-url: "https://phillipmuza.github.io/" # Add your actual domain here
+url: "https://phillipmuza.github.io/"
+disqus: https-phillipmuza-github-io
 
 include: ["_pages"]
 permalink: /:title/
@@ -24,14 +25,13 @@ plugins:
 
 # Defaults
 defaults:
-
 # all posts
 - scope:
     path: "_posts"
     values:
       layout: post
       author: Phillip
-  avatar: /assets/images/avatar1.jpg
+      comments: true
       
 # all pages
 - scope:
