@@ -1,0 +1,200 @@
+define(["require", "exports", "angularDependency", "jquery", "support/report-an-error.service", "angular/util/ngServiceWrapper", "angularDependency", "angular/util/ngServiceWrapper", "jquery", "lib/toastr", "support/report-an-error.service", "remspect/remspect.directive"], function (require, exports, angular, $, report_an_error_service_1, ngServiceWrapper_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var module = angular.module("reportAnErrorOverlay", ["study.remspect-directives"]);
+    module.service("ReportAnErrorService", function () { return (0, ngServiceWrapper_1.ngServiceWrapper)(report_an_error_service_1.ReportAnErrorService.instance()); });
+    var ReportAnErrorOverlayController = (function () {
+        function ReportAnErrorOverlayController($scope, reportAnErrorService) {
+            Object.defineProperty(this, "$scope", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: $scope
+            });
+            Object.defineProperty(this, "reportAnErrorService", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: reportAnErrorService
+            });
+            Object.defineProperty(this, "courseId", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "errorLocation", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "extra", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "guideline", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "itemId", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "modalId", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "siteResourceId", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "skillSetId", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "showReportAnErrorOverlay", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            Object.defineProperty(this, "submitState", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: 'EDITING'
+            });
+            Object.defineProperty(this, "selectedErrorType", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "errorDetail", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "errorOptions", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: report_an_error_service_1.REPORT_AN_ERROR_OPTIONS
+            });
+            Object.defineProperty(this, "studyAnswerErrorOptions", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: report_an_error_service_1.REPORT_AN_ERROR_STUDY_ANSWER_OPTIONS
+            });
+        }
+        Object.defineProperty(ReportAnErrorOverlayController.prototype, "showOverlay", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                this._resetOverlay();
+                this.showReportAnErrorOverlay = true;
+                $("#" + this.modalId).modal('show');
+            }
+        });
+        ;
+        Object.defineProperty(ReportAnErrorOverlayController.prototype, "hideOverlay", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                this.showReportAnErrorOverlay = false;
+                $("#" + this.modalId).modal('hide');
+            }
+        });
+        ;
+        Object.defineProperty(ReportAnErrorOverlayController.prototype, "_resetOverlay", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                this.submitState = 'EDITING';
+                this.selectedErrorType = "HINT";
+                this.errorDetail = "";
+            }
+        });
+        ;
+        Object.defineProperty(ReportAnErrorOverlayController.prototype, "submitErrorDetails", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                var _this = this;
+                this.submitState = 'SUBMITTING';
+                if (this.errorLocation === 'PLACEMENT_TEST_QUESTION') {
+                    this.itemId = this.itemId || 0;
+                }
+                else if (this.errorLocation === 'FLASHCARD_SET') {
+                    this.itemId = $("div.unseenCards > :last").attr('data-card-id');
+                }
+                if (this.extra) {
+                    this.errorDetail += "\n" + this.extra;
+                }
+                this.reportAnErrorService.submitReport({
+                    selectedErrorType: this.selectedErrorType,
+                    errorDetail: this.errorDetail,
+                    errorLocation: this.errorLocation,
+                    itemId: this.itemId,
+                    courseId: this.courseId,
+                    siteResourceId: this.siteResourceId,
+                    skillSetId: this.skillSetId,
+                    guideline: this.guideline
+                })
+                    .finally(function () {
+                    _this.$scope.$applyAsync(function () {
+                        _this.submitState = 'SUBMITTED';
+                    });
+                });
+            }
+        });
+        ;
+        Object.defineProperty(ReportAnErrorOverlayController, "$inject", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ["$scope", "ReportAnErrorService"]
+        });
+        return ReportAnErrorOverlayController;
+    }());
+    module.directive("reportAnErrorOverlay", function () {
+        return {
+            restrict: "E",
+            scope: {
+                courseId: "@",
+                errorLocation: "@",
+                extra: "@",
+                guideline: "@",
+                itemId: "@",
+                modalId: "@",
+                siteResourceId: "@",
+                skillSetId: "@",
+            },
+            templateUrl: '/templates/support/report-an-error-overlay.tpl',
+            bindToController: true,
+            controllerAs: "reportAnErrorOverlayController",
+            controller: ReportAnErrorOverlayController
+        };
+    });
+});
+
+//# sourceMappingURL=report-an-error.directive.js.map

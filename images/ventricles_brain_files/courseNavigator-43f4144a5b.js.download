@@ -1,0 +1,388 @@
+define(["require", "exports", "jquery"], function (require, exports, $) {
+    "use strict";
+    var CourseNavigator = (function () {
+        function CourseNavigator(courseNavigatorElement, noFlyout) {
+            if (noFlyout === void 0) { noFlyout = false; }
+            var _this = this;
+            Object.defineProperty(this, "$container", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "$chapters", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "$scrollToContainer", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "$headerContainer", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "isQuizNavigator", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "$lessonContainer", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "$lessons", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "currentLesson", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "hasScrolledToCurrentLesson", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            Object.defineProperty(this, "placeholder", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "flyoutMql", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "isLoggedIn", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "lessonNotFoundInOriginCourse", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            this.$container = $(courseNavigatorElement);
+            this.isQuizNavigator = !!this.$container.data('coursenavigator-quiz');
+            this.$chapters = $(courseNavigatorElement).find('[data-name="chapter"]');
+            this.$scrollToContainer = this.$container.find('.ios-scrollable');
+            this.$headerContainer = this.$container.find('.courseNavHeader');
+            this.$lessonContainer = $(courseNavigatorElement).find('[data-name="lessonList"]');
+            this.currentLesson = this.$container.find('.is-viewing');
+            this.isLoggedIn = document.querySelector("[data-member-id]") != null && document.querySelector("[data-member-id]").getAttribute("data-member-id") != "";
+            this.lessonNotFoundInOriginCourse = this.$container.data("lesson-not-found-in-origin-course") == true;
+            this.$chapters.find("a").on("click", function (e) { return e.preventDefault(); });
+            this.setupDynamicTopicLoading();
+            noFlyout = noFlyout || this.isQuizNavigator;
+            if (!noFlyout) {
+                this.placeholder =
+                    $("<div data-coursenavigatorplaceholder>").insertBefore(this.$container);
+                this.flyoutMql = window.matchMedia("(min-width: 768px)");
+                this.flyout();
+                this.flyoutMql.addListener(function () { return _this.flyout(); });
+                this.$container.on('shown.bs.offcanvas', function () { return _this.scrollToCurrentLesson(); });
+                this.$container.offcanvas({
+                    toggle: false,
+                    autohide: false
+                });
+                this.$scrollToContainer.on("scroll", function () { return _this.pinChapterHeader(); });
+            }
+            if (!this.hasScrolledToCurrentLesson) {
+                this.scrollToCurrentLesson();
+            }
+        }
+        Object.defineProperty(CourseNavigator.prototype, "setupDynamicTopicLoading", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                var self = this;
+                function clickHandler(i) {
+                    var $el = $(this);
+                    $el.off("click", clickHandler);
+                    var uri = $el.data("href");
+                    var aa = $el.data("aa");
+                    $.ajax({
+                        type: "GET",
+                        url: '/academy/getLessonsInTopic.ajax',
+                        data: {
+                            topicURI: uri,
+                            courseAcademyAssetId: aa
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            self.createHTML(data, i);
+                        },
+                        error: function (data) {
+                            $el.on("click", clickHandler);
+                        }
+                    });
+                }
+                this.$chapters.each(function (index, el) {
+                    if ($(el).is('[data-starting-chapter]')) {
+                        clickHandler.apply(el, [index]);
+                    }
+                    else if (!$(el).is('[data-loaded]')) {
+                        $(el).on("click", $.proxy(clickHandler, el, [index]));
+                    }
+                });
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "createHTML", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (data, index) {
+                var self = this;
+                var htmlToAppend = '';
+                var nextLessonIndex = parseInt($(this.$lessonContainer[index]).attr('data-next-lesson-index') || "-1");
+                for (var i = 0; i < data.length; i++) {
+                    var lesson = data[i];
+                    var loggedInQuizAttr = 'quiz-on-lesson-url="' + lesson.uri + '#/LessonQuiz" ';
+                    if (nextLessonIndex === i) {
+                        htmlToAppend +=
+                            '<li class="next-lesson" data-cname="course_navigator_next_lesson" test-id="course_navigator_next_lesson">'
+                                + '<a href="' + lesson.uri + '" '
+                                + (this.isLoggedIn ? 'quiz-on-lesson-url="' + lesson.uri + '#/LessonQuiz" ' : '')
+                                + self.makeVirtualAttr(lesson.courseAcademyAssetId) + '>';
+                        if (lesson.type === "LESSON") {
+                            htmlToAppend +=
+                                '<span class="lessonTime">' + self.convertSecondsToTime(lesson.videoDuration)
+                                    + '</span>';
+                            htmlToAppend += '<p>Next Lesson</p>'
+                                + '<div class="imgWithPlayIcon" title="' + lesson.title
+                                + '" data-cname="course_nav_next_lesson_thumbnail" test-id="course_nav_next_lesson_thumbnail">'
+                                + '<img class="videoPreview" src="/cimages/videopreview/videopreview-small/'
+                                + lesson.videoPreviewImageUri + '"/>'
+                                + '<span class="playIcon">'
+                                + '<span class="triangle"></span>'
+                                + '</span>'
+                                + '</div>'
+                                + '<span class="title" data-cname="course_nav_next_lesson_title" test-id="course_nav_next_lesson_title">'
+                                + lesson.title + '</span>'
+                                + '</a>'
+                                + '</li>';
+                        }
+                        else if (lesson.type === "FLASHCARD_SET") {
+                            htmlToAppend += '<p>Next Set</p>'
+                                + '<div class="imgWithPlayIcon" title="' + lesson.title
+                                + '" data-cname="course_nav_next_lesson_thumbnail" test-id="course_nav_next_lesson_thumbnail">'
+                                + '<img src="/images/reDesign/flashcardsPreview.png" alt="' + lesson.title
+                                + '"/>'
+                                + '</div>'
+                                + '<span class="title" data-cname="course_nav_next_lesson_title" test-id="course_nav_next_lesson_title">'
+                                + lesson.title + '</span>'
+                                + '</a>'
+                                + '</li>';
+                        }
+                        else {
+                            htmlToAppend += '<p>Next Lesson</p>'
+                                + '<div class="imgWithPlayIcon" title="' + lesson.title
+                                + '" data-cname="course_nav_next_lesson_thumbnail" test-id="course_nav_next_lesson_thumbnail">'
+                                + '<img src="/images/reDesign/defaultArticlePreview.png" alt="'
+                                + lesson.title + '"/>'
+                                + '</div>'
+                                + '<span class="title" data-cname="course_nav_next_lesson_title" test-id="course_nav_next_lesson_title">'
+                                + lesson.title + '</span>'
+                                + '</a>'
+                                + '</li>';
+                        }
+                        if (this.isQuizNavigator && lesson.assessmentUris && lesson.assessmentUris.length > 0) {
+                            htmlToAppend +=
+                                '<li>'
+                                    + '<a href="' + lesson.assessmentUris[0] + '"' + self.makeVirtualAttr(lesson.courseAcademyAssetId) + '>'
+                                    + '<span class="lesson__title">' + lesson.title + ' Quiz' + '</span>'
+                                    + '</a>'
+                                    + '</li>';
+                        }
+                    }
+                    else if (this.isQuizNavigator && !this.lessonNotFoundInOriginCourse) {
+                        if (lesson.assessmentUris && lesson.assessmentUris.length > 0) {
+                            var quizUri = lesson.assessmentUris[0];
+                            if (quizUri[0] !== '/') {
+                                quizUri = '/' + quizUri;
+                            }
+                            htmlToAppend +=
+                                '<li>'
+                                    + '<a href="' + quizUri + '"' + self.makeVirtualAttr(lesson.courseAcademyAssetId) + '>'
+                                    + '<span class="lesson__title">' + lesson.title + ' Quiz' + '</span>'
+                                    + '</a>'
+                                    + '</li>';
+                        }
+                    }
+                    else if (lesson.type === "FLASHCARD_SET") {
+                        htmlToAppend +=
+                            '<li><span class="icon icon-flash-cards"></span><a href="' + lesson.uri + '"'
+                                + self.makeVirtualAttr(lesson.courseAcademyAssetId) + '>'
+                                + lesson.title + '</a>';
+                        htmlToAppend += '</li>';
+                    }
+                    else {
+                        htmlToAppend +=
+                            '<li><a href="' + lesson.uri + '" '
+                                + (this.isLoggedIn ? 'quiz-on-lesson-url="' + lesson.uri + '#/LessonQuiz" ' : '')
+                                + self.makeVirtualAttr(lesson.courseAcademyAssetId) + '>'
+                                + lesson.title + '</a>';
+                        if (lesson.type === "LESSON") {
+                            htmlToAppend +=
+                                '<span class="lessonTime">' + self.convertSecondsToTime(lesson.videoDuration)
+                                    + '</span>';
+                        }
+                        htmlToAppend += '</li>';
+                    }
+                }
+                $(this.$lessonContainer[index]).prepend(htmlToAppend);
+                if (!self.hasScrolledToCurrentLesson) {
+                    self.scrollToCurrentLesson();
+                }
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "makeVirtualAttr", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (ancestryId) {
+                return "data-virtual=\"".concat(ancestryId, "\"");
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "convertSecondsToTime", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (seconds) {
+                var m = Math.floor(seconds / 60);
+                var s = this._twoDigitSeconds(seconds % 60);
+                return m + ':' + s;
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "_twoDigitSeconds", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (seconds) {
+                if (seconds > 9) {
+                    return seconds;
+                }
+                else {
+                    return '0' + seconds;
+                }
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "scrollToCurrentLesson", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (attemptsLeft) {
+                var _this = this;
+                if (attemptsLeft === void 0) { attemptsLeft = 2; }
+                this.hasScrolledToCurrentLesson = true;
+                var jQueryAnimationQueueName = "courseNavScrollQueue";
+                try {
+                    this.$scrollToContainer.stop(jQueryAnimationQueueName, true);
+                    var desiredScrollTop_1 = this.computeScrollToCurrentLessonScrollTop();
+                    this.$scrollToContainer
+                        .animate({ scrollTop: desiredScrollTop_1 }, {
+                        queue: jQueryAnimationQueueName,
+                        done: function () {
+                            window.setTimeout(function () {
+                                desiredScrollTop_1 = _this.computeScrollToCurrentLessonScrollTop();
+                                var actualScrollTop = _this.$scrollToContainer.scrollTop();
+                                if (desiredScrollTop_1 != actualScrollTop) {
+                                    attemptsLeft--;
+                                    if (attemptsLeft > 0) {
+                                        _this.scrollToCurrentLesson(attemptsLeft);
+                                    }
+                                }
+                            }, 250);
+                        }
+                    })
+                        .dequeue(jQueryAnimationQueueName);
+                }
+                catch (e) {
+                }
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "computeScrollToCurrentLessonScrollTop", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                var chapterHtmlId = this.currentLesson.attr("id");
+                if (!chapterHtmlId) {
+                    chapterHtmlId = this.currentLesson.closest(".collapse").attr("id");
+                }
+                var chapterHeader = $("[data-toggle=collapse][data-target=#" + chapterHtmlId + "]");
+                var desiredScrollTop = this.currentLesson.position().top
+                    + this.$scrollToContainer.scrollTop()
+                    - chapterHeader.outerHeight();
+                var maxScroll = this.$scrollToContainer[0].scrollHeight - this.$scrollToContainer[0].clientHeight;
+                var actualScrollTop = (maxScroll < desiredScrollTop) ? maxScroll : desiredScrollTop;
+                return actualScrollTop;
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "pinChapterHeader", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                var chapterHeaderToSticky;
+                var scrolledOffTopHeaders = this.$chapters.closest(".stickable").filter(function (index, el) {
+                    return $(el).position().top <= 0;
+                }).find(this.$chapters);
+                if (!scrolledOffTopHeaders.last().hasClass("collapsed")) {
+                    chapterHeaderToSticky = scrolledOffTopHeaders.last();
+                }
+                var chapterHeadersToReset = this.$chapters.not(chapterHeaderToSticky);
+                chapterHeadersToReset.css("position", "");
+                chapterHeadersToReset.css("top", "");
+                chapterHeadersToReset.closest(".stickable").css("height", "");
+                if (chapterHeaderToSticky) {
+                    chapterHeaderToSticky.closest(".stickable").css("height", chapterHeaderToSticky.outerHeight());
+                    chapterHeaderToSticky.css("position", "absolute");
+                    chapterHeaderToSticky.css("top", this.$scrollToContainer.scrollTop());
+                }
+            }
+        });
+        Object.defineProperty(CourseNavigator.prototype, "flyout", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                if (!this.flyoutMql.matches) {
+                    this.$container.addClass('navmenu navmenu-default navmenu-fixed-left offcanvas');
+                    this.$container.appendTo('[data-coursenavigatorbottom]');
+                }
+                else {
+                    this.$container.removeClass('navmenu navmenu-default navmenu-fixed-left offcanvas');
+                    this.$container.insertAfter(this.placeholder);
+                    this.scrollToCurrentLesson();
+                }
+            }
+        });
+        ;
+        return CourseNavigator;
+    }());
+    return CourseNavigator;
+});
+
+//# sourceMappingURL=courseNavigator.js.map

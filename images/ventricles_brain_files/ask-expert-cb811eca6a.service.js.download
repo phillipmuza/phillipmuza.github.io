@@ -1,0 +1,264 @@
+define(["require", "exports", "jquery", "angularDependency", "lib/toastr", "util/value-proxy", "angularDependency", "angular/util/http-post-params-as-form.provider", "jquery", "lib/toastr"], function (require, exports, $, angular, toastr, value_proxy_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.AskExpertService = exports.AskExpertSubjects = exports.InstantAnswersCreditsInfo = void 0;
+    var InstantAnswersCreditsInfo = (function () {
+        function InstantAnswersCreditsInfo() {
+            Object.defineProperty(this, "askAllowCount", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "creditsPerMonth", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+        }
+        return InstantAnswersCreditsInfo;
+    }());
+    exports.InstantAnswersCreditsInfo = InstantAnswersCreditsInfo;
+    exports.AskExpertSubjects = ["Business", "Math", "Social Science", "Science", "History", "English", "Computer Science", "Psychology", "Humanities"];
+    var AskExpertService = (function () {
+        function AskExpertService($http, $injector, $rootScope, $sce, httpPostParamsAsFormConfig) {
+            var _this = this;
+            Object.defineProperty(this, "$http", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: $http
+            });
+            Object.defineProperty(this, "$injector", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: $injector
+            });
+            Object.defineProperty(this, "$rootScope", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: $rootScope
+            });
+            Object.defineProperty(this, "$sce", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: $sce
+            });
+            Object.defineProperty(this, "httpPostParamsAsFormConfig", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: httpPostParamsAsFormConfig
+            });
+            Object.defineProperty(this, "askAllowCount", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "instantAnswersCreditsInfoProxy", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "questionResponseTimesProxy", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            this.askAllowCount = undefined;
+            this.instantAnswersCreditsInfoProxy = new value_proxy_1.default({}, function () {
+                return _this.$http.get("/member/ask/get-allowed-question-count.ajax")
+                    .then(function (response) {
+                    return {
+                        askAllowCount: response.data['ask_expert_allowed_count'],
+                        creditsPerMonth: response.data['credits_per_month']
+                    };
+                });
+            });
+            this.instantAnswersCreditsInfoProxy.getValue();
+            this.questionResponseTimesProxy = new value_proxy_1.default([], function () {
+                return _this.$http.get("/member/ask/get-response-times.ajax")
+                    .then(function (response) {
+                    return response.data.reduce(function (times, value) {
+                        times[value.category] = value.hours;
+                        return times;
+                    }, []);
+                });
+            });
+            this.questionResponseTimesProxy.getValue();
+        }
+        Object.defineProperty(AskExpertService.prototype, "getQuestions", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (numQuestions) {
+                var config = { params: { count: numQuestions } };
+                return this.$http.get("/member/ask/get-recent-questions.ajax", config);
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "getQuestionById", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (questionId) {
+                var config = { params: { questionId: questionId } };
+                return this.$http.get("/member/ask/get-question-by-id.ajax", config)
+                    .then(function (response) {
+                    return response.data;
+                });
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "getAllowedQuestionCount", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                return this.$http.get("/member/ask/get-allowed-question-count.ajax");
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "optIntoSms", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (phoneNumber) {
+                var data = {
+                    phoneNumber: phoneNumber,
+                    allowSms: true
+                };
+                return this.$http.post('/member/profile/update-sms-notification-setting.ajax', data, this.httpPostParamsAsFormConfig);
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "setQuestionContactInfo", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (phone, email, name, contactPreference) {
+                var data = {
+                    phoneNumber: phone,
+                    emailAddress: email,
+                    name: name,
+                    contactPreference: contactPreference
+                };
+                return this.$http.post('/member/ask/set-question-contact.ajax', data, this.httpPostParamsAsFormConfig);
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "askQuestion", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (question, subject, attachment, questionType) {
+                var formData = new FormData();
+                formData.append("category", subject);
+                if (question && question != "") {
+                    formData.append("question", question);
+                }
+                if (attachment) {
+                    formData.append("attachment", attachment);
+                }
+                if (questionType) {
+                    formData.append("questionType", questionType);
+                }
+                return this.$http.post("/member/ask/create-instant-answer-question.ajax", formData, {
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": undefined
+                    },
+                    transformRequest: angular.identity
+                }).then(function (data) {
+                    return data;
+                })
+                    .catch(function (error) {
+                    toastr.error("An error occured when submitting. Please try again, or contact customer support if it continues.", 'Error', {
+                        positionClass: 'toast-top-center'
+                    });
+                });
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "getRelatedLessons", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (search) {
+                var justText = $('<p/>').html(search).text().replace(/(<([^>]+)>)/ig, "");
+                var config = { params: { textSearchQuery: justText } };
+                return this.$http.get("/member/ask/get-related-lessons.ajax", config)
+                    .then(function (response) {
+                    return response.data;
+                });
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "rateAnswer", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (questionId, helpful) {
+                var data = {
+                    questionId: questionId,
+                    helpful: helpful
+                };
+                return this.$http.post('/member/ask/rate-answer.ajax', data, this.httpPostParamsAsFormConfig);
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "saveFeedback", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (questionId, feedback) {
+                var data = {
+                    questionId: questionId,
+                    feedbackText: feedback
+                };
+                return this.$http.post('/member/ask/give-answer-feedback.ajax', data, this.httpPostParamsAsFormConfig);
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService.prototype, "getQuestionResponseTimes", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                return this.$http.get("/member/ask/get-response-times.ajax")
+                    .then(function (response) { return response.data; });
+            }
+        });
+        Object.defineProperty(AskExpertService.prototype, "trustHtml", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (html) {
+                return this.$sce.trustAsHtml(html);
+            }
+        });
+        ;
+        Object.defineProperty(AskExpertService, "$inject", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ["$http", "$injector", "$rootScope", "$sce", 'httpPostParamsAsFormConfig']
+        });
+        return AskExpertService;
+    }());
+    exports.AskExpertService = AskExpertService;
+    var module = angular.module("ask-expert.service", ["study.http-post-params-as-form"])
+        .service("AskExpertService", AskExpertService)
+        .filter('htmlToPlaintext', function () {
+        return function (text) { return text ? String(text).replace(/<[^>]+>/gm, '') : ''; };
+    });
+});
+
+//# sourceMappingURL=ask-expert.service.js.map

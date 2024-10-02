@@ -1,0 +1,98 @@
+define(["require", "exports", "lib/axios"], function (require, exports, axios_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ReportAnErrorService = exports.REPORT_AN_ERROR_STUDY_ANSWER_OPTIONS = exports.REPORT_AN_ERROR_OPTIONS = void 0;
+    exports.REPORT_AN_ERROR_OPTIONS = [
+        {
+            name: "Select type of error",
+            key: 'HINT',
+            disabled: true
+        },
+        {
+            name: "Typo",
+            key: 'TYPO'
+        },
+        {
+            name: "Incorrect answer",
+            key: 'INCORRECT_ANSWER'
+        },
+        {
+            name: "Incorrect or outdated information",
+            key: 'INCORRECT_OR_OUTDATED_INFO'
+        },
+        {
+            name: "Broken image or video",
+            key: 'BROKEN_IMAGE_OR_VIDEO'
+        },
+        {
+            name: "Other (please specify)",
+            key: 'OTHER'
+        }
+    ];
+    exports.REPORT_AN_ERROR_STUDY_ANSWER_OPTIONS = [
+        {
+            name: "Select type of error",
+            key: 'HINT',
+            disabled: true
+        },
+        {
+            name: "Typo",
+            key: 'TYPO'
+        },
+        {
+            name: "Incorrect answer",
+            key: 'INCORRECT_ANSWER'
+        },
+        {
+            name: "Poor explanation",
+            key: 'POOR_EXPLANATION'
+        },
+        {
+            name: "Broken formatting, like image or table",
+            key: 'BROKEN_FORMATTING'
+        },
+        {
+            name: "Other (please specify)",
+            key: 'OTHER'
+        }
+    ];
+    var ReportAnErrorService = (function () {
+        function ReportAnErrorService() {
+        }
+        Object.defineProperty(ReportAnErrorService, "instance", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                if (!this.__INSTANCE) {
+                    this.__INSTANCE = new ReportAnErrorService();
+                }
+                return this.__INSTANCE;
+            }
+        });
+        Object.defineProperty(ReportAnErrorService.prototype, "submitReport", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (reportData) {
+                var params = {
+                    courseId: reportData.courseId,
+                    errorLocation: reportData.errorLocation,
+                    guideline: reportData.guideline,
+                    itemId: reportData.itemId,
+                    selectedError: reportData.selectedErrorType,
+                    siteResourceId: reportData.siteResourceId,
+                    skillSetId: reportData.skillSetId,
+                    url: window.location.href,
+                    userComments: reportData.errorDetail,
+                };
+                return axios_1.default.get("/academy/support/submit-error.json", { params: params });
+            }
+        });
+        ;
+        return ReportAnErrorService;
+    }());
+    exports.ReportAnErrorService = ReportAnErrorService;
+});
+
+//# sourceMappingURL=report-an-error.service.js.map

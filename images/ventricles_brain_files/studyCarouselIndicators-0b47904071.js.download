@@ -1,0 +1,102 @@
+define(["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.initStudyCarouselIndicators = void 0;
+    var initStudyCarouselIndicators = function ($, indicatorsContainer) {
+        var carouselElement = $(indicatorsContainer).closest('[data-ride="carousel"]')[0];
+        if ((carouselElement === null || carouselElement === void 0 ? void 0 : carouselElement.getAttribute("data-ride")) !== "carousel") {
+            console.error("Error initializing carousel indicators for", indicatorsContainer, "Immediate parent is not carousel.");
+            return;
+        }
+        $(carouselElement).on("slide.bs.carousel", function (e) {
+            var indicatorsElement = indicatorsContainer.querySelector(".study-carousel-indicators");
+            handleSlideChange(indicatorsElement, e.relatedTarget);
+        });
+        var indicatorsElement = indicatorsContainer.querySelector(".study-carousel-indicators");
+        handleSlideChange(indicatorsElement, carouselElement.querySelector(".carousel-slider__item.active"));
+    };
+    exports.initStudyCarouselIndicators = initStudyCarouselIndicators;
+    var handleSlideChange = function (indicatorsContainer, newActiveSlide) {
+        var parentElement = $(newActiveSlide).closest('[data-ride="carousel"]')[0];
+        if (newActiveSlide == null || parentElement == null) {
+            console.error("Could not initialize study carousel.");
+            return;
+        }
+        var slideElements = parentElement.querySelectorAll(".carousel-slider__item");
+        var activeSlideIndex = Array.from(slideElements).indexOf(newActiveSlide);
+        if (activeSlideIndex === -1) {
+            console.error("Could not find active slide.");
+            return;
+        }
+        applyCarouselButtonStyles(indicatorsContainer, parentElement, activeSlideIndex);
+        applyCarouselIndicatorsStyles(indicatorsContainer, activeSlideIndex);
+    };
+    var applyCarouselButtonStyles = function (indicatorsContainer, parentElement, activeSlideIndex) {
+        var numIndicators = indicatorsContainer.children.length;
+        var leftButton = parentElement.querySelector("[data-study-indicators-button-left]");
+        var rightButton = parentElement.querySelector("[data-study-indicators-button-right]");
+        $(leftButton).removeClass("study-carousel__button--disabled");
+        $(rightButton).removeClass("study-carousel__button--disabled");
+        if (activeSlideIndex === 0) {
+            $(leftButton).addClass("study-carousel__button--disabled");
+        }
+        else if (activeSlideIndex === numIndicators - 1) {
+            $(rightButton).addClass("study-carousel__button--disabled");
+        }
+    };
+    var applyCarouselIndicatorsStyles = function (indicatorsContainer, activeSlideIndex) {
+        var indicatorsContainerJquery = $(indicatorsContainer);
+        indicatorsContainerJquery.find(".active").removeClass("active");
+        indicatorsContainerJquery.find(".study-carousel-indicator__dot")
+            .each(function (i, ele) { return ele.style.transform = null; });
+        var activeIndicator = indicatorsContainer.children.item(activeSlideIndex);
+        $(activeIndicator).addClass("active");
+        var numIndicators = indicatorsContainer.children.length;
+        if (numIndicators <= 5) {
+            return;
+        }
+        var numPrevIndicators = 2;
+        var numNextIndicators = 2;
+        var prevIndicatorIndex = activeSlideIndex - numPrevIndicators;
+        var nextIndicatorIndex = activeSlideIndex + numNextIndicators;
+        var indicators = Array.from(indicatorsContainer.querySelectorAll(".study-carousel-indicator__dot"));
+        if (prevIndicatorIndex <= 0) {
+            indicatorsContainer.style.transform = "translateX(0px)";
+            indicators.slice(3).forEach(function (indicatorEle) {
+                var index = indicators.indexOf(indicatorEle);
+                var stopTransformIndex = 2;
+                applyScaleTransform(indicatorEle, index, stopTransformIndex);
+            });
+        }
+        else if (nextIndicatorIndex >= numIndicators - 1) {
+            indicatorsContainer.style.transform = "translateX(".concat(indicatorsContainer.clientWidth - indicatorsContainer.scrollWidth, "px)");
+            indicators.slice(0, numIndicators - 3).forEach(function (indicatorEle) {
+                var index = indicators.indexOf(indicatorEle);
+                var stopTransformIndex = numIndicators - 3;
+                applyScaleTransform(indicatorEle, index, stopTransformIndex);
+            });
+        }
+        else {
+            var columnGap = parseInt(getComputedStyle(indicatorsContainer).columnGap);
+            var indicatorSize = activeIndicator.clientWidth;
+            var numIndicatorsHidden = activeSlideIndex - 2;
+            indicatorsContainer.style.transform = "translateX(-".concat((columnGap + indicatorSize) * numIndicatorsHidden, "px)");
+            indicators.forEach(function (indicatorEle, index) {
+                applyScaleTransform(indicatorEle, index, activeSlideIndex);
+            });
+        }
+    };
+    var applyScaleTransform = function (indicatorElement, indicatorIndex, stopTransformIndex) {
+        if (stopTransformIndex === indicatorIndex) {
+            indicatorElement.style.transform = null;
+        }
+        else if (Math.abs(stopTransformIndex - indicatorIndex) === 1) {
+            indicatorElement.style.transform = "scale(0.75)";
+        }
+        else {
+            indicatorElement.style.transform = "scale(0.5)";
+        }
+    };
+});
+
+//# sourceMappingURL=studyCarouselIndicators.js.map

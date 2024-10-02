@@ -1,0 +1,74 @@
+define(["require", "exports", "jquery"], function (require, exports, $) {
+    "use strict";
+    var TranscriptClickHandler = (function () {
+        function TranscriptClickHandler() {
+        }
+        Object.defineProperty(TranscriptClickHandler.prototype, "initialize", {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function () {
+                $(document).ready(function () {
+                    $("[data-transcript-trigger]").click(function () {
+                        var urlWithTranscript = $(this).data(TranscriptClickHandler.TRANSCRIPT_TRIGGER_DATA_ATTR);
+                        var isTranscriptOnCurrentPage = (window.location.pathname === urlWithTranscript);
+                        if (!isTranscriptOnCurrentPage) {
+                            window.location.assign(urlWithTranscript + "#" + TranscriptClickHandler.TRANSCRIPT_ELEMENT_ID);
+                        }
+                        else {
+                            window.location.hash = TranscriptClickHandler.LESSON_TAB_ID;
+                            setTimeout(function () {
+                                window.location.hash = TranscriptClickHandler.TRANSCRIPT_ELEMENT_ID;
+                            }, TranscriptClickHandler.SCROLL_TO_TRANSCRIPT_DELAY);
+                        }
+                    });
+                    $("[data-additional-activities-trigger]").on("click", function () {
+                        setTimeout(function () {
+                            window.location.hash = TranscriptClickHandler.ADDITIONAL_ACTIVITIES_ELEMENT_ID;
+                        }, TranscriptClickHandler.SCROLL_TO_TRANSCRIPT_DELAY);
+                    });
+                });
+            }
+        });
+        Object.defineProperty(TranscriptClickHandler, "LESSON_TAB_ID", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "lesson"
+        });
+        Object.defineProperty(TranscriptClickHandler, "SCROLL_TO_TRANSCRIPT_DELAY", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 500
+        });
+        Object.defineProperty(TranscriptClickHandler, "TRANSCRIPT_ELEMENT_ID", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "transcriptHeader"
+        });
+        Object.defineProperty(TranscriptClickHandler, "TRANSCRIPT_ELEMENT_TAB_ID", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "transcriptTab"
+        });
+        Object.defineProperty(TranscriptClickHandler, "TRANSCRIPT_TRIGGER_DATA_ATTR", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "transcript-trigger"
+        });
+        Object.defineProperty(TranscriptClickHandler, "ADDITIONAL_ACTIVITIES_ELEMENT_ID", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "additionalActivities"
+        });
+        return TranscriptClickHandler;
+    }());
+    return TranscriptClickHandler;
+});
+
+//# sourceMappingURL=transcript-click-handler.js.map

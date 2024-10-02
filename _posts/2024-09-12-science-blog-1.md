@@ -8,9 +8,9 @@ image: /images/interorgan-onlinelead.jpg
 published: true
 comments: true
 ---
-[![Figure from Faulty communication between organs could make use old](/images/interorgan-onlinelead.jpg)](https://www.science.org/content/article/faulty-communication-organs-make-us-old#:~:text=Researchers%20have%20uncovered%20other%20instances,physical%20decline%20or%20speeds%20aging.)
+[![Figure from Faulty communication between organs could make us old](/images/interorgan-onlinelead.jpg)](https://www.science.org/content/article/faulty-communication-organs-make-us-old#:~:text=Researchers%20have%20uncovered%20other%20instances,physical%20decline%20or%20speeds%20aging.)
 
-[Faulty communication between organs could make use old](https://www.science.org/content/article/faulty-communication-organs-make-us-old#:~:text=Researchers%20have%20uncovered%20other%20instances,physical%20decline%20or%20speeds%20aging.)
+[Faulty communication between organs could make us old](https://www.science.org/content/article/faulty-communication-organs-make-us-old#:~:text=Researchers%20have%20uncovered%20other%20instances,physical%20decline%20or%20speeds%20aging.)
 
 ## An objective summary of the paper
 

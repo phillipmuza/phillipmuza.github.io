@@ -1,0 +1,45 @@
+define(["require", "exports", "mobx-react", "react", "react", "react-utils/media-query-store-util", "registration/ReactRegPage.app", "lib/react-bootstrap", "logging/visible/react-track-visible", "util/InlineSvgComponents"], function (require, exports, mobx_react_1, React, react_1, media_query_store_util_1, ReactRegPage_app_1, react_bootstrap_1, react_track_visible_1, InlineSvgComponents_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RecentSubscriberPopup = void 0;
+    var RECENT_SUBSCRIBER_SUMMARY_SECONDS_BEFORE_SHOWING = 4;
+    var RECENT_SUBSCRIBER_SUMMARY_SECONDS_VISIBLE = 10;
+    exports.RecentSubscriberPopup = (0, mobx_react_1.observer)(function (props) {
+        var _a = (0, react_1.useState)(false), shouldShow = _a[0], setShouldShow = _a[1];
+        var app = props.app;
+        (0, react_1.useEffect)(function () {
+            setTimeout(function () {
+                setShouldShow(true);
+            }, RECENT_SUBSCRIBER_SUMMARY_SECONDS_BEFORE_SHOWING * 1000);
+        }, []);
+        var toastClassNames = ["toast-view", "recent-subscriber-popup-toast-view"];
+        if (media_query_store_util_1.mediumMinQuery.matches) {
+            toastClassNames.push("bottom-right");
+        }
+        else {
+            toastClassNames.push("bottom-center");
+        }
+        return React.createElement(react_bootstrap_1.ToastContainer, { className: toastClassNames.join(" ") },
+            React.createElement(react_bootstrap_1.Toast, { ref: (0, react_track_visible_1.trackingRef)(), show: shouldShow, onClose: function () { return setShouldShow(false); }, delay: RECENT_SUBSCRIBER_SUMMARY_SECONDS_VISIBLE * 1000, autohide: true, "data-cname": "recent_subscriber_popup", "test-id": "recent_subscriber_popup" },
+                React.createElement(react_bootstrap_1.Toast.Body, null,
+                    React.createElement("div", { className: "recent-subscriber-popup" },
+                        React.createElement("div", { className: "recent-subscriber-popup__icon-container-accent" },
+                            React.createElement("div", { className: "recent-subscriber-popup__icon-container" },
+                                React.createElement("div", { className: "recent-subscriber-popup__icon" },
+                                    React.createElement(InlineSvgComponents_1.InlineSvg, { src: "/images/icons/material/icon-rocket-24.svg" })))),
+                        React.createElement("div", { className: "recent-subscriber-popup__details" },
+                            React.createElement("div", { className: "recent-subscriber-popup__heading-container" },
+                                React.createElement("strong", { className: "recent-subscriber-popup__heading" },
+                                    app.recentSubscriberSummary.subscriberCount,
+                                    " ",
+                                    app.recentSubscriberSummary.subscriberCount === 1 ? "person" : "people",
+                                    " ",
+                                    "in the last ",
+                                    ReactRegPage_app_1.ReactRegPageApp.RECENT_SUBSCRIBERS_HOURS_AGO,
+                                    " hours"),
+                                React.createElement(react_bootstrap_1.CloseButton, { className: "recent-subscriber-popup__close", onClick: function () { return setShouldShow(false); }, "data-cname": "recent_subscriber_popup_close", "test-id": "recent_subscriber_popup_close" })),
+                            React.createElement("span", { className: "recent-subscriber-popup__text" }, "have signed up for this product"))))));
+    });
+});
+
+//# sourceMappingURL=RecentSubscriberPopup.js.map

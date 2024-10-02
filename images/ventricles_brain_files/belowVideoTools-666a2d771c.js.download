@@ -1,0 +1,23 @@
+define(["require", "exports", "jquery", "lib/jquery/bootstrap"], function (require, exports, $) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var belowVideoTools = $("#belowVideoTools");
+    belowVideoTools.find(".collapse").collapse({
+        toggle: false
+    });
+    $('[below-video-toggle]').on('click', function () {
+        var selector = $(this).attr('below-video-toggle');
+        var collapsibleElement = belowVideoTools.find(selector);
+        var collapsibleAlreadyOpen = collapsibleElement.hasClass('in');
+        if (collapsibleAlreadyOpen) {
+            belowVideoTools.removeClass("open");
+            collapsibleElement.collapse("hide");
+        }
+        else {
+            belowVideoTools.addClass("open");
+            collapsibleElement.collapse("show");
+        }
+    });
+});
+
+//# sourceMappingURL=belowVideoTools.js.map
