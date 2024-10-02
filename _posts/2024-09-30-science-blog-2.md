@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Science #2: Restoration of cervical lymphatic vessel function in aging rescues cerebrospinal fluid drainage"
-date: 2024-09-30
+date: 2024-10-02
 categories: [science]
 tags: [featured] 
 image: /images/brain_tubes.jpg
