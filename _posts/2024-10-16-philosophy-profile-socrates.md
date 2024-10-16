@@ -6,7 +6,7 @@ categories: [philosophy]
 tags: [featured, profiles] 
 image: /images/death-of-socrates.jpg
 published: true
-comments: true
+comments: false
 ---
 <p align="center">
   <a href="https://www.britannica.com/biography/Socrates">
