@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Philosophy #4: Aristotle's Four Causes to understand anything."
+title: "Philosophy #4: Aristotle's Four Causes to Understanding Anything."
 date: 2024-12-12
 categories: [philosophy]
 tags: [featured, ancient athens, metaphysics] 
